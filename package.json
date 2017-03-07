@@ -3,11 +3,21 @@
   "version": "0.0.1",
   "description": "Simple todo API",
   "main": "index.js",
+  "scripts": {
+    "test": "mocha server/**/*.test.js",
+    "test-watch": "nodemon --exec 'npm test'"
+  },
   "author": "Tom Burnett",
   "license": "MIT",
   "dependencies": {
     "body-parser": "^1.17.1",
     "express": "^4.15.2",
     "mongoose": "^4.8.6"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0",
+    "nodemon": "^1.11.0",
+    "supertest": "^3.0.0"
   }
 }
