@@ -7,7 +7,7 @@ const Todo = require('../models/Todo');
 
 const seedTodos = [
   { _id: new ObjectId(), text: 'First test todo' },
-  { _id: new ObjectId(), text: 'Second test todo' },
+  { _id: new ObjectId(), text: 'Second test todo', completed: true, completedAt: 123 },
 ];
 
 beforeEach((done) => {
@@ -129,5 +129,54 @@ describe('DELETE /todos/:id', () => {
       .delete('/todos/' + new ObjectId())
       .expect(404)
       .end(done);
+  });
+});
+
+describe('PATCH /todos/:id', () => {
+  it('should update todo', (done) => {
+    const id = seedTodos[0]._id.toHexString();
+
+    request(app)
+      .patch('/todos/' + id)
+      .send({ completed: true })
+      .expect(200)
+      .expect(res => {
+        expect(res.body.todo._id).to.equal(id);
+      })
+      .end(err => {
+        if (err) return done(err);
+
+        Todo.findById(id)
+          .then(todo => {
+            expect(todo.completed).to.equal(true);
+            expect(todo.completedAt).to.be.a('number');
+            done();
+          })
+          .catch(err => done(err));
+      });
+
+  });
+
+  it('should clear completedAt when completed set to false', (done) => {
+    const id = seedTodos[1]._id.toHexString();
+
+    request(app)
+      .patch('/todos/' + id)
+      .send({ completed: false })
+      .expect(200)
+      .expect(res => {
+        expect(res.body.todo._id).to.equal(id);
+      })
+      .end(err => {
+        if (err) return done(err);
+
+        Todo.findById(id)
+          .then(todo => {
+            expect(todo.completed).to.equal(false);
+            expect(todo.completedAt).to.not.exist;
+            done();
+          })
+          .catch(err => done(err));
+      });
   });
 });
