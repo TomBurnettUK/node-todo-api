@@ -7,7 +7,7 @@ const _ = require('lodash');
 const mongoose = require('./db/mongoose');
 
 const Todo = require('./models/Todo');
-// const User = require('./models/User');
+const User = require('./models/User');
 
 const PORT = process.env.PORT || 3000;
 
@@ -20,7 +20,7 @@ app.post('/todos', (req, res) => {
     text: req.body.text
   });
   todo.save()
-    .then(doc => res.send(doc))
+    .then(todo => res.json(todo))
     .catch(err => res.status(400).send(err));
 });
 
@@ -84,6 +84,17 @@ app.delete('/todos/:id', (req, res) => {
       res.json({todo})
     })
     .catch(err => res.status(500).send(err));
+});
+
+// POST /users
+app.post('/users', (req, res) => {
+  const userInfo = _.pick(req.body, ['email', 'password']);
+  const user = new User(userInfo);
+
+  user.save()
+    .then(user => user.generateAuthToken())
+    .then(token => res.header('x-auth', token).json(user))
+    .catch(err => res.status(400).send(err));
 });
 
 app.listen(PORT, () => {
