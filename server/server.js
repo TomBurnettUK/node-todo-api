@@ -44,6 +44,22 @@ app.get('/todos/:id', (req, res) => {
     .catch(err => res.status(500).send(err));
 });
 
+// DELETE /todos/:id
+app.delete('/todos/:id', (req, res) => {
+  const id = req.params.id;
+  if (!mongoose.Types.ObjectId.isValid(id))
+    return res.status(400).send();
+
+  Todo.findByIdAndRemove(id)
+    .then(todo => {
+      if (!todo) {
+        return res.status(404).send();
+      }
+      res.json({todo})
+    })
+    .catch(err => res.status(500).send(err));
+});
+
 app.listen(PORT, () => {
   console.log('Server started on port', PORT);
 });
