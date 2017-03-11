@@ -103,6 +103,20 @@ app.get('/users/me', authenticate, (req, res) => {
   res.json(req.user);
 });
 
+// POST /users/login
+app.post('/users/login', (req, res) => {
+  const { email, password } = req.body;
+  
+  User.findByCredentials(email, password)
+    .then((user) => {
+      return user.generateAuthToken()
+        .then(token => res.header('x-auth', token).json(user));
+    })
+    .catch((err) => {
+      res.status(400).send(err);
+    });
+});
+
 app.listen(PORT, () => {
   console.log('Server started on port', PORT);
 });
