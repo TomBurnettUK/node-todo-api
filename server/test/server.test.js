@@ -223,8 +223,10 @@ describe('POST /users', () => {
             expect(user).to.exist;
             expect(user.password).to.not.equal(password);
             done();
-          });
-      });
+          })
+          .catch(err => done(err));
+      })
+      
   });
 
   it('should return error if request invalid', (done) => {
@@ -251,5 +253,50 @@ describe('POST /users', () => {
         expect(res.body.email).to.not.exist;
       })
       .end(done);
+  });
+});
+
+describe('POST /users/login', () => {
+  it('should login user and return auth token', (done) => {
+    request(app)
+      .post('/users/login')
+      .send({ email: seedUsers[1].email, password: seedUsers[1].password })
+      .expect(200)
+      .expect(res => {
+        expect(res.headers['x-auth']).to.exist;
+      })
+      .end((err, res) => {
+        if (err) return done(err);
+
+        User.findById(seedUsers[1]._id)
+          .then(user => {
+            expect(user.tokens[0]).to.include({
+              access: 'auth',
+              token: res.headers['x-auth']
+            });
+            done();
+          })
+          .catch(err => done(err));
+      });
+  });
+
+  it('should reject invalid login', (done) => {
+    request(app)
+      .post('/users/login')
+      .send({ email: seedUsers[1].email, password: 'incorrect' })
+      .expect(400)
+      .expect(res => {
+        expect(res.headers['x-auth']).to.not.exist;
+      })
+      .end((err) => {
+        if(err) return done(err);
+
+        User.findById(seedUsers[1]._id)
+          .then(user => {
+            expect(user.tokens[0]).to.not.exist;
+            done();
+          })
+          .catch(err => done(err));
+      });
   });
 });
