@@ -9,6 +9,8 @@ const mongoose = require('./db/mongoose');
 const Todo = require('./models/Todo');
 const User = require('./models/User');
 
+const authenticate = require('./middleware/authenticate');
+
 const PORT = process.env.PORT || 3000;
 
 const app = express();
@@ -95,6 +97,10 @@ app.post('/users', (req, res) => {
     .then(user => user.generateAuthToken())
     .then(token => res.header('x-auth', token).json(user))
     .catch(err => res.status(400).send(err));
+});
+
+app.get('/users/me', authenticate, (req, res) => {
+  res.json(req.user);
 });
 
 app.listen(PORT, () => {
